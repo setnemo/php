@@ -109,6 +109,7 @@ if [[ "$ENABLE_XDEBUG" == "1" ]] ; then
         echo "Enabling xdebug"
         echo "If you get this error, you can safely ignore it: /usr/local/bin/docker-php-ext-enable: line 83: nm: not found"
         # see https://github.com/docker-library/php/pull/420
+    pecl install xdebug-3.1.4
     docker-php-ext-enable xdebug
     # see if file exists
     if [ -f $XdebugFile ]; then
@@ -117,6 +118,7 @@ if [[ "$ENABLE_XDEBUG" == "1" ]] ; then
             echo "Xdebug already enabled... skipping"
         else
             echo "zend_extension=$(find /usr/local/lib/php/extensions/ -name xdebug.so)" > $XdebugFile # Note, single arrow to overwrite file.
+            echo "xdebug.mode=debug "  >> $XdebugFile
             echo "xdebug.remote_enable=1 "  >> $XdebugFile
             echo "xdebug.remote_host=host.docker.internal" >> $XdebugFile
             echo "xdebug.remote_log=/tmp/xdebug.log"  >> $XdebugFile

@@ -1,6 +1,6 @@
 FROM node:18.1.0-alpine3.15 AS nodejs
 
-FROM php:8.1.6-fpm-alpine3.15
+FROM php:8.1.5-fpm-alpine3.15
 
 LABEL org.opencontainers.image.authors=""
 LABEL org.opencontainers.image.url=""
@@ -162,7 +162,7 @@ RUN curl http://getcomposer.org/installer | php -- --install-dir=/usr/bin/ --fil
     && apk add --no-cache php8-cli php8-dev libstdc++ mysql-client bash bash-completion shadow \
         supervisor git zip unzip python2 coreutils libpng libmemcached-libs krb5-libs icu-libs \
         icu c-client libzip openldap-clients imap postgresql-client postgresql-libs libcap tzdata sqlite \
-        lua-resty-core nginx-mod-http-lua \
+        lua-resty-core nginx-mod-http-lua libc-dev make gcc clang \
     && ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone \
     && set -xe \
     && apk add --no-cache --update --virtual .phpize-deps $PHPIZE_DEPS \
