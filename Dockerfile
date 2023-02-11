@@ -194,6 +194,6 @@ RUN curl http://getcomposer.org/installer | php -- --install-dir=/usr/bin/ --fil
     && mkdir -p /var/log/supervisor \
     && chmod +x /start.sh
 
-EXPOSE 443 80
+EXPOSE 443 80 5173
 
 CMD ["/start.sh"]
