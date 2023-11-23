@@ -22,6 +22,7 @@ RUN echo "cgi.fix_pathinfo=0" > ${php_vars} &&\
         -e "s/;pm.max_requests = 500/pm.max_requests = 800/g" \
         -e "s/;listen.mode = 0660/listen.mode = 0666/g" \
         -e "s/^;clear_env = no$/clear_env = no/" \
+        -e "s/www-data/laravel/" \
         ${fpm_conf} \
     && cp /usr/local/etc/php/php.ini-production /usr/local/etc/php/php.ini
 RUN apk add --no-cache php-cli php82-dev linux-headers php82-bcmath libstdc++ mysql-client bash bash-completion shadow
@@ -45,25 +46,36 @@ RUN pecl install msgpack && docker-php-ext-enable msgpack
 RUN pecl install igbinary && docker-php-ext-enable igbinary
 RUN printf "\n\n\n\n\n\n\n\n\n\n" | pecl install memcached
 RUN docker-php-ext-enable memcached
-USER root
 COPY conf/supervisord.conf /etc/supervisord.conf
-COPY start.sh /start.sh
 RUN apk del .all-deps .phpize-deps \
     && rm -rf /var/cache/apk/* /tmp/* /var/tmp/* \
     && set -ex \
-    && mkdir -p /var/log/supervisor \
-    && chmod +x /start.sh
+    && mkdir -p /var/log/supervisor
 RUN if [[ "$COMPOSERMIRROR" != "" ]]; then composer config -g repos.packagist composer ${COMPOSERMIRROR}; fi
-RUN echo "date.timezone="$TZ > /usr/local/etc/php/conf.d/timezone.ini \
-    rm -f /etc/localtime && ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone \
+RUN echo "date.timezone="${TZ} > /usr/local/etc/php/conf.d/timezone.ini \
+    && rm -f /etc/localtime \
+    && ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime \
+    && echo ${TZ} > /etc/timezone \
     && echo "log_errors = On" >> /usr/local/etc/php/conf.d/docker-vars.ini  \
     && echo "error_log = /dev/stderr" >> /usr/local/etc/php/conf.d/docker-vars.ini  \
     && sed -i "s/memory_limit = 128M/memory_limit = 1024M/g" /usr/local/etc/php/conf.d/docker-vars.ini \
     && sed -i "s/post_max_size = 100M/post_max_size = 1024M/g" /usr/local/etc/php/conf.d/docker-vars.ini \
     && sed -i "s/upload_max_filesize = 100M/upload_max_filesize = 1024M/g" /usr/local/etc/php/conf.d/docker-vars.ini \
-    && mkdir -p /var/www/html/storage/{logs,app/public,framework/{cache/data,sessions,testing,views}} \
-    && chown -Rf laravel.laravel /var/www/html/storage
+    && mkdir -p /var/www/html/storage/{logs,app/public,framework/{cache/data,sessions,testing,views}}
 WORKDIR "/var/www/html"
-USER www-data
-EXPOSE 9000
+ENV USER=laravel
+ENV UID=1101
+ENV GID=1011
+RUN addgroup --gid "$GID" "$USER"
+RUN adduser \
+    --disabled-password \
+    --gecos "" \
+    --home "$(pwd)" \
+    --ingroup "$USER" \
+    --no-create-home \
+    --uid "$UID" \
+    "$USER"
+USER laravel
+RUN echo '0 * * * * /bin/bash -c "if [-f /dev/shm/supervisor.sock]; then echo skipping; else /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf"; fi;' > crontab.txt
+RUN /usr/bin/crontab /crontab.txt
 CMD ["php-fpm"]
