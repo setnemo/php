@@ -18,17 +18,6 @@ else
     echo php_flag[display_errors] = on >> /usr/local/etc/php-fpm.d/www.conf
 fi
 
-# Do the same for SSL sites
-if [ -f /etc/nginx/conf.d/default-ssl.conf ]; then
-    if [[ "$REAL_IP_HEADER" == "1" ]] ; then
-        sed -i "s/#real_ip_header X-Forwarded-For;/real_ip_header X-Forwarded-For;/" /etc/nginx/conf.d/default-ssl.conf
-        sed -i "s/#set_real_ip_from/set_real_ip_from/" /etc/nginx/conf.d/default-ssl.conf
-        if [ ! -z "$REAL_IP_FROM" ]; then
-            sed -i "s#172.16.0.0/12#$REAL_IP_FROM#" /etc/nginx/conf.d/default-ssl.conf
-        fi
-    fi
-fi
-
 # Set the desired timezone
 if [ ! -z "" ]; then
     echo "date.timezone="$TZ > /usr/local/etc/php/conf.d/timezone.ini
@@ -69,7 +58,7 @@ if [[ "$ENABLE_XDEBUG" == "1" ]] ; then
     else
         echo "Enabling xdebug"
         # see https://github.com/docker-library/php/pull/420
-        pecl install xdebug-3.1.4
+        pecl install xdebug
         docker-php-ext-enable xdebug
         # see if file exists
         if [ -f $XdebugFile ]; then

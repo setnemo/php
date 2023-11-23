@@ -1,16 +1,6 @@
 # Nginx + php-fpm (v8) + nodejs
 
-Based on php:8.1.5-fpm-alpine3.15, node:18.1.0-alpine3.15 (nodejs is not included in most of other nginx-php images...but needed by a lot of php frameworks), with nginx:alpine and richarvey/nginx-php-fpm's Docker script
-
-Tags:
-* latest, php8.1.5_node18.1.0 (2022-05-07)
-* php8.1.4_node17.8 (2022-04-10)
-* php8.1.3_node17 (2022-03-07)
-* php8.0.13_node17 (2022-03-07)
-* php8_node15 (2022-03-07)
-
-**NOTE** If you are upgrading from PHP 8.0 to 8.1, you may need to run `composer update` to upgrade php packages, because some packages under 8.0 are not supported in 8.1
-
+Based on php:php:8.2.12-fpm-alpine3.18
 
 ## PHP Modules
 
@@ -35,7 +25,6 @@ igbinary
 imap
 intl
 json
-ldap
 libxml
 mbstring
 memcached
@@ -51,6 +40,7 @@ pdo_sqlite
 pgsql
 Phar
 posix
+random
 readline
 redis
 Reflection
@@ -63,6 +53,7 @@ SPL
 sqlite3
 standard
 tokenizer
+xdebug
 xml
 xmlreader
 xmlwriter
@@ -71,14 +62,32 @@ zip
 zlib
 
 [Zend Modules]
+Xdebug
 Zend OPcache
 ```
 
 ## How to use
 
-For example, use this docker image to deploy a **Laravel 9** project.
+For example, use this docker image to deploy a **Laravel 10** project.
 
-### Develop with this image
+## Environment
+```dotenv
+COMPOSERMIRROR=packagist.pages.dev
+TZ=Europe/Kyiv
+ERRORS=1
+PHP_ERRORS_STDERR=1
+PHP_MEM_LIMIT=1024
+PHP_POST_MAX_SIZE=1024
+PHP_UPLOAD_MAX_FILESIZE=1024
+PHP_REDIS_SESSION_HOST=sessionredis
+ENABLE_XDEBUG=1
+RUN_SCRIPTS #/var/www/html/scripts/
+CREATE_LARAVEL_STORAGE=1
+```
+
+For example, use this docker image to deploy a **Laravel 10** project.
+
+## Develop with this image
 
 Another example to develop with this image for a **Laravel 9** project, you may modify the `docker-compose.yml` of your project.
 
@@ -88,24 +97,52 @@ Make sure you have correct environment parameters set:
 # For more information: https://laravel.com/docs/sail
 version: '3'
 services:
-  laravel:
-    image: ghcr.io/setnemo/php:latest
+  nginx:
+    image: ghcr.io/setnemo/nginx:latest
     environment:
       WEBROOT: '/var/www/html/public'
-      PHP_REDIS_SESSION_HOST: 'redis'
       CREATE_LARAVEL_STORAGE: '1'
-      PHP_ERRORS_STDERR: '1'
-      ENABLE_XDEBUG: '1'
+      PHPFPMHOST: 'laravel'
     ports:
       - '${APP_PORT:-80}:80'
-      - '${VITE_PORT:-5173}:5173'
     volumes:
       - '.:/var/www/html'
     networks:
       - sail
     depends_on:
+      - laravel
+  laravel:
+    image: ghcr.io/setnemo/php:latest
+    environment:
+      PHP_UPLOAD_MAX_FILESIZE: 1024
+      PHP_REDIS_SESSION_HOST: redis
+      CREATE_LARAVEL_STORAGE: 1
+      PHP_POST_MAX_SIZE: 1024
+      PHP_ERRORS_STDERR: 1
+      COMPOSERMIRROR: packagist.pages.dev
+      PHP_MEM_LIMIT: 1024
+      ENABLE_XDEBUG: 1
+      WEBROOT: /var/www/html/public
+      ERRORS: 1
+      TZ: Europe/Kyiv
+    volumes:
+      - '.:/var/www/html'
+      - './supervisor/deploy.conf:/etc/supervisor/conf.d/deploy.conf:ro'
+      - './supervisor/schedule.conf:/etc/supervisor/conf.d/schedule.conf:ro'
+    networks:
+      - sail
+    depends_on:
       - postgres
       - redis
+  node:
+    image: ghcr.io/setnemo/node:latest
+    working_dir: /var/www/html
+    tty: true
+    ports:
+      - '${VITE_PORT:-5173}:5173'
+    volumes:
+      - ./:/var/www/html
+      - './supervisor/deploy.node.conf:/etc/supervisor/conf.d/deploy.node.conf:ro'
   postgres:
     image: postgres:9.5-alpine
     volumes:
@@ -135,13 +172,6 @@ services:
       test: ["CMD", "redis-cli", "ping"]
       retries: 3
       timeout: 5s
-  mailhog:
-    image: 'mailhog/mailhog:latest'
-    ports:
-      - '${FORWARD_MAILHOG_PORT:-1025}:1025'
-      - '${FORWARD_MAILHOG_DASHBOARD_PORT:-8025}:8025'
-    networks:
-      - sail
 networks:
   sail:
     driver: bridge
@@ -150,5 +180,4 @@ volumes:
     driver: local
   sail-redis:
     driver: local
-
 ```
