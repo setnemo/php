@@ -33,20 +33,19 @@ RUN apk add --no-cache --update --virtual .all-deps $PHP_MODULE_DEPS
 COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr/local/bin/
 RUN install-php-extensions sockets \
     && install-php-extensions bcmath \
-    && install-php-extensions pgsql \
-    && install-php-extensions pdo_pgsql \
-    && install-php-extensions zip \
-    && install-php-extensions imap \
-    && install-php-extensions dom \
-    && install-php-extensions opcache \
-    && install-php-extensions mysqli \
-    && install-php-extensions pdo \
-    && install-php-extensions pdo_mysql \
-    && install-php-extensions pgsql \
-    && install-php-extensions sockets \
-    && install-php-extensions gd \
-    && install-php-extensions intl \
-    && install-php-extensions soap
+    && docker-php-ext-install pgsql \
+    && docker-php-ext-install pdo_pgsql \
+    && docker-php-ext-install zip \
+    && docker-php-ext-install imap \
+    && docker-php-ext-install dom \
+    && docker-php-ext-install opcache \
+    && docker-php-ext-install mysqli \
+    && docker-php-ext-install pdo \
+    && docker-php-ext-install pdo_mysql \
+    && docker-php-ext-install pgsql \
+    && docker-php-ext-install gd \
+    && docker-php-ext-install intl \
+    && docker-php-ext-install soap
 RUN printf "\n\n\n\n" | pecl install -o -f redis
 RUN rm -rf /tmp/pear
 RUN docker-php-ext-enable redis
