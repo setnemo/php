@@ -25,7 +25,7 @@ RUN apk add --no-cache php-cli php82-dev linux-headers php82-bcmath libstdc++ my
 RUN apk add --no-cache supervisor git zip unzip python3 coreutils libpng libmemcached-libs krb5-libs icu-libs
 RUN apk add --no-cache icu c-client libzip openldap-clients imap postgresql-client postgresql-libs libcap tzdata sqlite
 RUN curl http://getcomposer.org/installer | php -- --install-dir=/usr/bin/ --filename=composer
-RUN apk add --no-cache lua-resty-core nginx-mod-http-lua libc-dev make gcc clang vim bat
+RUN apk add --no-cache lua-resty-core libc-dev make gcc clang vim bat
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 RUN set -xe
 RUN apk add --no-cache --update --virtual .phpize-deps $PHPIZE_DEPS
@@ -43,13 +43,12 @@ RUN pecl install igbinary && docker-php-ext-enable igbinary
 RUN printf "\n\n\n\n\n\n\n\n\n\n" | pecl install memcached
 RUN docker-php-ext-enable memcached
 USER root
-WORKDIR "/root"
 COPY conf/supervisord.conf /etc/supervisord.conf
-COPY start.sh /root/start.sh
+COPY start.sh /start.sh
 RUN apk del .all-deps .phpize-deps \
     && rm -rf /var/cache/apk/* /tmp/* /var/tmp/* \
     && set -ex \
     && mkdir -p /var/log/supervisor \
-    && chmod +x /root/start.sh
+    && chmod +x /start.sh
 WORKDIR "/var/www/html"
-CMD ["sh", "-c", "/root/start.sh"]
+CMD ["/start.sh"]
