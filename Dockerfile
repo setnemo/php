@@ -53,13 +53,6 @@ RUN apk del .all-deps .phpize-deps \
     && set -ex \
     && mkdir -p /var/log/supervisor \
     && chmod +x /start.sh
-ENV UID=1000
-ENV GID=1000
-RUN delgroup dialout
-RUN addgroup -g ${GID} --system laravel
-RUN adduser -G laravel --system -D -s /bin/sh -u ${UID} laravel
-RUN sed -i "s/user = www-data/user = laravel/g" /usr/local/etc/php-fpm.d/www.conf
-RUN sed -i "s/group = www-data/group = laravel/g" /usr/local/etc/php-fpm.d/www.conf
 RUN if [[ "$COMPOSERMIRROR" != "" ]]; then composer config -g repos.packagist composer ${COMPOSERMIRROR}; fi
 RUN echo "date.timezone="$TZ > /usr/local/etc/php/conf.d/timezone.ini \
     rm -f /etc/localtime && ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone \
@@ -71,6 +64,6 @@ RUN echo "date.timezone="$TZ > /usr/local/etc/php/conf.d/timezone.ini \
     && mkdir -p /var/www/html/storage/{logs,app/public,framework/{cache/data,sessions,testing,views}} \
     && chown -Rf laravel.laravel /var/www/html/storage
 WORKDIR "/var/www/html"
-USER laravel
+USER www-data
 EXPOSE 9000
 CMD ["php-fpm"]
