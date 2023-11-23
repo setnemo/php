@@ -63,6 +63,7 @@ RUN apk del .all-deps .phpize-deps \
     && rm -rf /var/cache/apk/* /tmp/* /var/tmp/* \
     && set -ex \
     && mkdir -p /var/log/supervisor \
+    && apk add supervisor --no-cache \
     && apk add --no-cache bash \
     && chmod +x /root/start.sh
 WORKDIR "/var/www/html"
