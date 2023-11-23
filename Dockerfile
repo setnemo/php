@@ -1,3 +1,4 @@
+FROM node:18.1.0-alpine3.15 AS nodejs
 FROM php:8.2.12-fpm-alpine3.18
 USER root
 ENV TZ=Etc/GMT
@@ -5,6 +6,8 @@ ENV COMPOSERMIRROR=""
 ENV PHP_MODULE_DEPS zlib-dev libmemcached-dev cyrus-sasl-dev libpng-dev libxml2-dev krb5-dev curl-dev icu-dev libzip-dev openldap-dev imap-dev postgresql-dev
 ENV fpm_conf /usr/local/etc/php-fpm.d/www.conf
 ENV php_vars /usr/local/etc/php/conf.d/docker-vars.ini
+COPY --from=nodejs /opt /opt
+COPY --from=nodejs /usr/local /usr/local
 RUN echo "cgi.fix_pathinfo=0" > ${php_vars} &&\
     echo "upload_max_filesize = 100M"  >> ${php_vars} &&\
     echo "post_max_size = 100M"  >> ${php_vars} &&\
@@ -64,8 +67,7 @@ RUN echo "date.timezone="$TZ > /usr/local/etc/php/conf.d/timezone.ini \
     echo "error_log = /dev/stderr" >> /usr/local/etc/php/conf.d/docker-vars.ini  \
     sed -i "s/memory_limit = 128M/memory_limit = 1024M/g" /usr/local/etc/php/conf.d/docker-vars.ini \
     sed -i "s/post_max_size = 100M/post_max_size = 1024M/g" /usr/local/etc/php/conf.d/docker-vars.ini \
-    sed -i "s/upload_max_filesize = 100M/upload_max_filesize= 1024M/g" /usr/local/etc/php/conf.d/docker-vars.ini \
-    sed -i 's/session.save_handler = files/session.save_handler = redis\nsession.save_path = "tcp:\/\/redis:6379"/g' /usr/local/etc/php/php.ini \
+    sed -i "s/upload_max_filesize = 100M/upload_max_filesize = 1024M/g" /usr/local/etc/php/conf.d/docker-vars.ini \
     mkdir -p /var/www/html/storage/{logs,app/public,framework/{cache/data,sessions,testing,views}} \
     chown -Rf laravel.laravel /var/www/html/storage
 WORKDIR "/var/www/html"
