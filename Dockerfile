@@ -1,10 +1,7 @@
 FROM php:8.2.12-fpm-alpine3.18
 USER root
-WORKDIR /var/www/html
 ENV TZ=Etc/GMT
 ENV COMPOSERMIRROR=""
-COPY conf/supervisord.conf /etc/supervisord.conf
-COPY start.sh /start.sh
 ENV PHP_MODULE_DEPS zlib-dev libmemcached-dev cyrus-sasl-dev libpng-dev libxml2-dev krb5-dev curl-dev icu-dev libzip-dev openldap-dev imap-dev postgresql-dev
 ENV fpm_conf /usr/local/etc/php-fpm.d/www.conf
 ENV php_vars /usr/local/etc/php/conf.d/docker-vars.ini
@@ -58,10 +55,13 @@ RUN pecl install msgpack && docker-php-ext-enable msgpack
 RUN pecl install igbinary && docker-php-ext-enable igbinary
 RUN printf "\n\n\n\n\n\n\n\n\n\n" | pecl install memcached
 RUN docker-php-ext-enable memcached
-COPY ./start.sh /start.sh
+WORKDIR /
+COPY ["conf/supervisord.conf", "/etc/supervisord.conf"]
+COPY ["start.sh", "/usr/bin"]
 RUN apk del .all-deps .phpize-deps \
     && rm -rf /var/cache/apk/* /tmp/* /var/tmp/* \
     && set -ex \
     && mkdir -p /var/log/supervisor \
-    && chmod +x /start.sh
-CMD ["/start.sh"]
+    && chmod +x /start.sh \
+WORKDIR /var/www/html
+CMD ["/usr/bin/start.sh"]
