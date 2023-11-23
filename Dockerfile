@@ -51,4 +51,5 @@ RUN apk del .all-deps .phpize-deps \
     && mkdir -p /var/log/supervisor \
     && chmod +x /start.sh
 WORKDIR "/var/www/html"
+EXPOSE 9000
 CMD ["/start.sh"]
