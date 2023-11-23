@@ -5,29 +5,6 @@
 # Set PHP composer mirror. China php composer mirror: https://mirrors.cloud.tencent.com/composer/
 if [[ "$COMPOSERMIRROR" != "" ]]; then composer config -g repos.packagist composer ${COMPOSERMIRROR}; fi
 
-# Set npm mirror. China npm mirror: https://registry.npmmirror.com
-if [[ "$NPMMIRROR" != "" ]]; then npm config set registry ${NPMMIRROR}; fi
-
-# Set custom webroot
-if [ ! -z "$WEBROOT" ]; then
- sed -i "s#root /var/www/html;#root ${WEBROOT};#g" /etc/nginx/conf.d/default.conf
-else
- webroot=/var/www/html
-fi
-
-# Enable custom nginx config files if they exist
-if [ -f /var/www/html/conf/nginx.conf ]; then
-  cp /var/www/html/conf/nginx.conf /etc/nginx/nginx.conf
-fi
-
-if [ -f /var/www/html/conf/nginx-site.conf ]; then
-  cp /var/www/html/conf/nginx-site.conf /etc/nginx/conf.d/default.conf
-fi
-
-if [ -f /var/www/html/conf/nginx-site-ssl.conf ]; then
-  cp /var/www/html/conf/nginx-site-ssl.conf /etc/nginx/conf.d/default-ssl.conf
-fi
-
 # Prevent config files from being filled to infinity by force of stop and restart the container
 lastlinephpconf="$(grep "." /usr/local/etc/php-fpm.conf | tail -1)"
 if [[ $lastlinephpconf == *"php_flag[display_errors]"* ]]; then
@@ -39,22 +16,6 @@ if [[ "$ERRORS" != "1" ]] ; then
  echo php_flag[display_errors] = off >> /usr/local/etc/php-fpm.d/www.conf
 else
  echo php_flag[display_errors] = on >> /usr/local/etc/php-fpm.d/www.conf
-fi
-
-# Display Version Details or not
-if [[ "$HIDE_NGINX_HEADERS" == "0" ]] ; then
- sed -i "s/server_tokens off;/server_tokens on;/g" /etc/nginx/nginx.conf
-else
- sed -i "s/expose_php = On/expose_php = Off/g" /usr/local/etc/php-fpm.conf
-fi
-
-# Pass real-ip to logs when behind ELB, etc
-if [[ "$REAL_IP_HEADER" == "1" ]] ; then
- sed -i "s/#real_ip_header X-Forwarded-For;/real_ip_header X-Forwarded-For;/" /etc/nginx/conf.d/default.conf
- sed -i "s/#set_real_ip_from/set_real_ip_from/" /etc/nginx/conf.d/default.conf
- if [ ! -z "$REAL_IP_FROM" ]; then
-  sed -i "s#172.16.0.0/12#$REAL_IP_FROM#" /etc/nginx/conf.d/default.conf
- fi
 fi
 
 # Do the same for SSL sites
