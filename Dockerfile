@@ -50,8 +50,8 @@ RUN apk del .all-deps .phpize-deps \
     && set -ex \
     && mkdir -p /var/log/supervisor \
     && chmod +x /start.sh
-ENV UID=${UID}
-ENV GID=${GID}
+ENV UID=1000
+ENV GID=1000
 RUN delgroup dialout
 RUN addgroup -g ${GID} --system laravel
 RUN adduser -G laravel --system -D -s /bin/sh -u ${UID} laravel
