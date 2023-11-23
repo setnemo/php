@@ -58,6 +58,7 @@ RUN pecl install msgpack && docker-php-ext-enable msgpack
 RUN pecl install igbinary && docker-php-ext-enable igbinary
 RUN printf "\n\n\n\n\n\n\n\n\n\n" | pecl install memcached
 RUN docker-php-ext-enable memcached
+COPY ./start.sh /start.sh
 RUN apk del .all-deps .phpize-deps \
     && rm -rf /var/cache/apk/* /tmp/* /var/tmp/* \
     && set -ex \
