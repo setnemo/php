@@ -55,13 +55,15 @@ RUN pecl install msgpack && docker-php-ext-enable msgpack
 RUN pecl install igbinary && docker-php-ext-enable igbinary
 RUN printf "\n\n\n\n\n\n\n\n\n\n" | pecl install memcached
 RUN docker-php-ext-enable memcached
-WORKDIR /
+USER root
+WORKDIR "/root"
 COPY conf/supervisord.conf /etc/supervisord.conf
-COPY start.sh /usr/bin/start.sh
+COPY start.sh /root/start.sh
 RUN apk del .all-deps .phpize-deps \
     && rm -rf /var/cache/apk/* /tmp/* /var/tmp/* \
     && set -ex \
     && mkdir -p /var/log/supervisor \
-    && chmod +x /usr/bin/start.sh
-WORKDIR /var/www/html
-CMD ["/usr/bin/start.sh"]
+    && apk add --no-cache bash \
+    && chmod +x /root/start.sh
+WORKDIR "/var/www/html"
+CMD ["sh", "-c", "/root/start.sh"]
