@@ -64,7 +64,7 @@ RUN echo "date.timezone="${TZ} > /usr/local/etc/php/conf.d/timezone.ini \
     && mkdir -p /var/www/html/storage/{logs,app/public,framework/{cache/data,sessions,testing,views}}
 WORKDIR "/var/www/html"
 RUN echo '0 * * * * /bin/bash -c "FILE=/dev/shm/supervisor.sock; if [ -f \"${FILE}\"] ; then echo skipping; else /usr/bin/supervisord -c /etc/supervisord.conf; fi;"' > crontab.txt
-RUN /usr/bin/crontab /crontab.txt
+RUN /usr/bin/crontab ./crontab.txt
 ENV USER=laravel
 ENV UID=1101
 ENV GID=1011
