@@ -56,8 +56,8 @@ RUN pecl install igbinary && docker-php-ext-enable igbinary
 RUN printf "\n\n\n\n\n\n\n\n\n\n" | pecl install memcached
 RUN docker-php-ext-enable memcached
 WORKDIR /
-COPY ["conf/supervisord.conf", "/etc/supervisord.conf"]
-COPY ["start.sh", "/usr/bin"]
+COPY conf/supervisord.conf /etc/supervisord.conf
+COPY start.sh /usr/bin/start.sh
 RUN apk del .all-deps .phpize-deps \
     && rm -rf /var/cache/apk/* /tmp/* /var/tmp/* \
     && set -ex \
