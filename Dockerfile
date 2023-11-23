@@ -57,6 +57,18 @@ RUN addgroup -g ${GID} --system laravel
 RUN adduser -G laravel --system -D -s /bin/sh -u ${UID} laravel
 RUN sed -i "s/user = www-data/user = laravel/g" /usr/local/etc/php-fpm.d/www.conf
 RUN sed -i "s/group = www-data/group = laravel/g" /usr/local/etc/php-fpm.d/www.conf
+RUN if [[ "$COMPOSERMIRROR" != "" ]]; then composer config -g repos.packagist composer ${COMPOSERMIRROR}; fi
+RUN echo "date.timezone="$TZ > /usr/local/etc/php/conf.d/timezone.ini \
+    rm -f /etc/localtime && ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone \
+    echo "log_errors = On" >> /usr/local/etc/php/conf.d/docker-vars.ini  \
+    echo "error_log = /dev/stderr" >> /usr/local/etc/php/conf.d/docker-vars.ini  \
+    sed -i "s/memory_limit = 128M/memory_limit = 1024M/g" /usr/local/etc/php/conf.d/docker-vars.ini \
+    sed -i "s/post_max_size = 100M/post_max_size = 1024M/g" /usr/local/etc/php/conf.d/docker-vars.ini \
+    sed -i "s/upload_max_filesize = 100M/upload_max_filesize= 1024M/g" /usr/local/etc/php/conf.d/docker-vars.ini \
+    sed -i 's/session.save_handler = files/session.save_handler = redis\nsession.save_path = "tcp:\/\/redis:6379"/g' /usr/local/etc/php/php.ini \
+    mkdir -p /var/www/html/storage/{logs,app/public,framework/{cache/data,sessions,testing,views}} \
+    chown -Rf laravel.laravel /var/www/html/storage
 WORKDIR "/var/www/html"
+USER laravel
 EXPOSE 9000
-CMD ["/start.sh"]
+CMD ["php-fpm"]

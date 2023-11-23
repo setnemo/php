@@ -66,27 +66,6 @@ Xdebug
 Zend OPcache
 ```
 
-## How to use
-
-For example, use this docker image to deploy a **Laravel 10** project.
-
-## Environment
-```dotenv
-COMPOSERMIRROR=packagist.pages.dev
-TZ=Europe/Kyiv
-ERRORS=1
-PHP_ERRORS_STDERR=1
-PHP_MEM_LIMIT=1024
-PHP_POST_MAX_SIZE=1024
-PHP_UPLOAD_MAX_FILESIZE=1024
-PHP_REDIS_SESSION_HOST=sessionredis
-ENABLE_XDEBUG=1
-RUN_SCRIPTS #/var/www/html/scripts/
-CREATE_LARAVEL_STORAGE=1
-```
-
-For example, use this docker image to deploy a **Laravel 10** project.
-
 ## Develop with this image
 
 Another example to develop with this image for a **Laravel 9** project, you may modify the `docker-compose.yml` of your project.
@@ -101,12 +80,13 @@ services:
     image: ghcr.io/setnemo/nginx:latest
     environment:
       WEBROOT: '/var/www/html/public'
-      CREATE_LARAVEL_STORAGE: '1'
-      PHPFPMHOST: 'laravel'
     ports:
       - '${APP_PORT:-80}:80'
     volumes:
       - '.:/var/www/html'
+    environment:
+      GID: 1000
+      UID: 1000
     networks:
       - sail
     depends_on:
@@ -114,16 +94,8 @@ services:
   laravel:
     image: ghcr.io/setnemo/php:latest
     environment:
-      PHP_UPLOAD_MAX_FILESIZE: 1024
-      PHP_REDIS_SESSION_HOST: redis
-      CREATE_LARAVEL_STORAGE: 1
-      PHP_POST_MAX_SIZE: 1024
-      PHP_ERRORS_STDERR: 1
-      COMPOSERMIRROR: packagist.pages.dev
-      PHP_MEM_LIMIT: 1024
-      ENABLE_XDEBUG: 1
-      WEBROOT: /var/www/html/public
-      ERRORS: 1
+      GID: 1000
+      UID: 1000
       TZ: Europe/Kyiv
     volumes:
       - '.:/var/www/html'
