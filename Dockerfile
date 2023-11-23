@@ -62,6 +62,6 @@ RUN apk del .all-deps .phpize-deps \
     && rm -rf /var/cache/apk/* /tmp/* /var/tmp/* \
     && set -ex \
     && mkdir -p /var/log/supervisor \
-    && chmod +x /start.sh \
+    && chmod +x /usr/bin/start.sh
 WORKDIR /var/www/html
 CMD ["/usr/bin/start.sh"]
