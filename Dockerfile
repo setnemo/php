@@ -63,13 +63,13 @@ RUN sed -i "s/group = www-data/group = laravel/g" /usr/local/etc/php-fpm.d/www.c
 RUN if [[ "$COMPOSERMIRROR" != "" ]]; then composer config -g repos.packagist composer ${COMPOSERMIRROR}; fi
 RUN echo "date.timezone="$TZ > /usr/local/etc/php/conf.d/timezone.ini \
     rm -f /etc/localtime && ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone \
-    echo "log_errors = On" >> /usr/local/etc/php/conf.d/docker-vars.ini  \
-    echo "error_log = /dev/stderr" >> /usr/local/etc/php/conf.d/docker-vars.ini  \
-    sed -i "s/memory_limit = 128M/memory_limit = 1024M/g" /usr/local/etc/php/conf.d/docker-vars.ini \
-    sed -i "s/post_max_size = 100M/post_max_size = 1024M/g" /usr/local/etc/php/conf.d/docker-vars.ini \
-    sed -i "s/upload_max_filesize = 100M/upload_max_filesize = 1024M/g" /usr/local/etc/php/conf.d/docker-vars.ini \
-    mkdir -p /var/www/html/storage/{logs,app/public,framework/{cache/data,sessions,testing,views}} \
-    chown -Rf laravel.laravel /var/www/html/storage
+    && echo "log_errors = On" >> /usr/local/etc/php/conf.d/docker-vars.ini  \
+    && echo "error_log = /dev/stderr" >> /usr/local/etc/php/conf.d/docker-vars.ini  \
+    && sed -i "s/memory_limit = 128M/memory_limit = 1024M/g" /usr/local/etc/php/conf.d/docker-vars.ini \
+    && sed -i "s/post_max_size = 100M/post_max_size = 1024M/g" /usr/local/etc/php/conf.d/docker-vars.ini \
+    && sed -i "s/upload_max_filesize = 100M/upload_max_filesize = 1024M/g" /usr/local/etc/php/conf.d/docker-vars.ini \
+    && mkdir -p /var/www/html/storage/{logs,app/public,framework/{cache/data,sessions,testing,views}} \
+    && chown -Rf laravel.laravel /var/www/html/storage
 WORKDIR "/var/www/html"
 USER laravel
 EXPOSE 9000
