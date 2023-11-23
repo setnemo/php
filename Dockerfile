@@ -50,6 +50,13 @@ RUN apk del .all-deps .phpize-deps \
     && set -ex \
     && mkdir -p /var/log/supervisor \
     && chmod +x /start.sh
+ENV UID=${UID}
+ENV GID=${GID}
+RUN delgroup dialout
+RUN addgroup -g ${GID} --system laravel
+RUN adduser -G laravel --system -D -s /bin/sh -u ${UID} laravel
+RUN sed -i "s/user = www-data/user = laravel/g" /usr/local/etc/php-fpm.d/www.conf
+RUN sed -i "s/group = www-data/group = laravel/g" /usr/local/etc/php-fpm.d/www.conf
 WORKDIR "/var/www/html"
 EXPOSE 9000
 CMD ["/start.sh"]
