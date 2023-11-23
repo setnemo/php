@@ -77,6 +77,6 @@ RUN adduser \
     --ingroup "$USER" \
     --no-create-home \
     --uid "$UID" \
-    "$USERcd
+    "$USER"
 USER laravel
 CMD ["php-fpm"]
