@@ -21,31 +21,19 @@ RUN echo "cgi.fix_pathinfo=0" > ${php_vars} &&\
         -e "s/^;clear_env = no$/clear_env = no/" \
         ${fpm_conf} \
     && cp /usr/local/etc/php/php.ini-production /usr/local/etc/php/php.ini
-RUN curl http://getcomposer.org/installer | php -- --install-dir=/usr/bin/ --filename=composer \
-RUN apk add --no-cache php8-cli php8-dev linux-headers php82-bcmath libstdc++ mysql-client bash bash-completion shadow \
-        supervisor git zip unzip python2 coreutils libpng libmemcached-libs krb5-libs icu-libs \
-        icu c-client libzip openldap-clients imap postgresql-client postgresql-libs libcap tzdata sqlite \
-        lua-resty-core nginx-mod-http-lua libc-dev make gcc clang vim bat \
+RUN apk add --no-cache php-cli php82-dev linux-headers php82-bcmath libstdc++ mysql-client bash bash-completion shadow
+RUN apk add --no-cache supervisor git zip unzip python3 coreutils libpng libmemcached-libs krb5-libs icu-libs
+RUN apk add --no-cache icu c-client libzip openldap-clients imap postgresql-client postgresql-libs libcap tzdata sqlite
+RUN curl http://getcomposer.org/installer | php -- --install-dir=/usr/bin/ --filename=composer
+RUN apk add --no-cache lua-resty-core nginx-mod-http-lua libc-dev make gcc clang vim bat
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 RUN set -xe
 RUN apk add --no-cache --update --virtual .phpize-deps $PHPIZE_DEPS
 RUN apk add --no-cache --update --virtual .all-deps $PHP_MODULE_DEPS
 COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr/local/bin/
 RUN install-php-extensions sockets \
-    && install-php-extensions bcmath \
-    && docker-php-ext-install pgsql \
-    && docker-php-ext-install pdo_pgsql \
-    && docker-php-ext-install zip \
-    && docker-php-ext-install imap \
-    && docker-php-ext-install dom \
-    && docker-php-ext-install opcache \
-    && docker-php-ext-install mysqli \
-    && docker-php-ext-install pdo \
-    && docker-php-ext-install pdo_mysql \
-    && docker-php-ext-install pgsql \
-    && docker-php-ext-install gd \
-    && docker-php-ext-install intl \
-    && docker-php-ext-install soap
+    && install-php-extensions bcmath
+RUN docker-php-ext-install pgsql pdo_pgsql zip imap dom opcache mysqli pdo pdo_mysql pgsql gd intl soap
 RUN printf "\n\n\n\n" | pecl install -o -f redis
 RUN rm -rf /tmp/pear
 RUN docker-php-ext-enable redis
@@ -60,8 +48,6 @@ COPY conf/supervisord.conf /etc/supervisord.conf
 COPY start.sh /root/start.sh
 RUN apk del .all-deps .phpize-deps \
     && rm -rf /var/cache/apk/* /tmp/* /var/tmp/* \
-    && apk update && apk add  --no-cache supervisor \
-    && apk add --no-cache bash \
     && set -ex \
     && mkdir -p /var/log/supervisor \
     && chmod +x /root/start.sh

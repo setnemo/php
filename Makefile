@@ -12,7 +12,7 @@ Makefile: ;              # skip prerequisite discovery
 
 .PHONY: build-and-push
 build-and-push:
-	docker build . --no-cache -t=ghcr.io/setnemo/php:latest && docker push ghcr.io/setnemo/php:latest
+	docker build . --no-cache --cpuset-cpus="0-3" -t=ghcr.io/setnemo/php:latest && docker push ghcr.io/setnemo/php:latest
 
 .PHONY: default
 default: build-and-push
