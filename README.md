@@ -1,6 +1,6 @@
 # Nginx + php-fpm (v8) + nodejs
 
-Based on php:php:8.2.12-fpm-alpine3.18
+Based on php:php:8.2.12-fpm-alpine3.18 + supervisor ```/etc/supervisor/conf.d/*.conf```
 
 ## PHP Modules
 
