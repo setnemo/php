@@ -2,6 +2,7 @@ FROM node:18.1.0-alpine3.15 AS nodejs
 FROM php:8.2.12-fpm-alpine3.18
 USER root
 ENV TZ=Etc/GMT
+ENV OPCACHE=""
 ENV COMPOSERMIRROR=""
 ENV PHP_MODULE_DEPS zlib-dev libmemcached-dev cyrus-sasl-dev libpng-dev libxml2-dev krb5-dev curl-dev icu-dev libzip-dev openldap-dev imap-dev postgresql-dev
 ENV fpm_conf /usr/local/etc/php-fpm.d/www.conf
@@ -22,7 +23,6 @@ RUN echo "cgi.fix_pathinfo=0" > ${php_vars} &&\
         -e "s/;pm.max_requests = 500/pm.max_requests = 800/g" \
         -e "s/;listen.mode = 0660/listen.mode = 0666/g" \
         -e "s/^;clear_env = no$/clear_env = no/" \
-        -e "s/www-data/laravel/" \
         ${fpm_conf} \
     && cp /usr/local/etc/php/php.ini-production /usr/local/etc/php/php.ini
 RUN apk add --no-cache php-cli php82-dev linux-headers php82-bcmath libstdc++ mysql-client bash bash-completion shadow
@@ -37,7 +37,8 @@ RUN apk add --no-cache --update --virtual .all-deps $PHP_MODULE_DEPS
 COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr/local/bin/
 RUN install-php-extensions sockets \
     && install-php-extensions bcmath
-RUN docker-php-ext-install pgsql pdo_pgsql zip imap dom opcache mysqli pdo pdo_mysql pgsql gd intl soap
+RUN docker-php-ext-install pgsql pdo_pgsql zip imap dom mysqli pdo pdo_mysql pgsql gd intl soap
+RUN if [[ "$OPCACHE" != "0" ]]; then docker-php-ext-install opcache; fi
 RUN printf "\n\n\n\n" | pecl install -o -f redis
 RUN rm -rf /tmp/pear
 RUN docker-php-ext-enable redis
@@ -62,21 +63,8 @@ RUN echo "date.timezone="${TZ} > /usr/local/etc/php/conf.d/timezone.ini \
     && sed -i "s/post_max_size = 100M/post_max_size = 1024M/g" /usr/local/etc/php/conf.d/docker-vars.ini \
     && sed -i "s/upload_max_filesize = 100M/upload_max_filesize = 1024M/g" /usr/local/etc/php/conf.d/docker-vars.ini \
     && mkdir -p /var/www/html/storage/{logs,app/public,framework/{cache/data,sessions,testing,views}}
-WORKDIR "/var/www/html"
 RUN echo '* * * * * /bin/bash -c "FILE=/dev/shm/supervisor.sock; if [ -f \"${FILE}\"] ; then echo skipping; else /usr/bin/supervisord -c /etc/supervisord.conf; fi;"' > crontab.txt
 RUN echo '* * * * * /bin/bash -c "FILE=/var/www/html/supervisor-restart.pid; if [ -f \"${FILE}\"] ; then supervisorctl restart all && rm /var/www/html/supervisor-restart.pid; else sleep 45; fi;"' >> crontab.txt
 RUN /usr/bin/crontab ./crontab.txt
-ENV USER=laravel
-ENV UID=1101
-ENV GID=1011
-RUN addgroup --gid "$GID" "$USER"
-RUN adduser \
-    --disabled-password \
-    --gecos "" \
-    --home "$(pwd)" \
-    --ingroup "$USER" \
-    --no-create-home \
-    --uid "$UID" \
-    "$USER"
-USER laravel
-CMD ["php-fpm", "--force-stderr", "--nodaemonize", "--fpm-config", "/usr/local/etc/php-fpm.d/www.conf"]
+WORKDIR "/var/www/html"
+CMD ["/usr/local/sbin/php-fpm", "--force-stderr", "--nodaemonize", "--fpm-config", "/usr/local/etc/php-fpm.d/www.conf"]
