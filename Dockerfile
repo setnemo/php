@@ -67,4 +67,6 @@ RUN echo '* * * * * /bin/bash -c "FILE=/dev/shm/supervisor.sock; if [ -f \"${FIL
 RUN echo '* * * * * /bin/bash -c "FILE=/var/www/html/supervisor-restart.pid; if [ -f \"${FILE}\"] ; then supervisorctl restart all && rm /var/www/html/supervisor-restart.pid; else sleep 45; fi;"' >> crontab.txt
 RUN /usr/bin/crontab ./crontab.txt
 WORKDIR "/var/www/html"
-CMD ["/usr/local/sbin/php-fpm", "--force-stderr", "--nodaemonize", "--fpm-config", "/usr/local/etc/php-fpm.d/www.conf"]
+STOPSIGNAL SIGQUIT
+EXPOSE 9000
+CMD ["php-fpm"]
