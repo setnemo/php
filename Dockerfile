@@ -79,4 +79,4 @@ RUN adduser \
     --uid "$UID" \
     "$USER"
 USER laravel
-CMD ["php-fpm"]
+CMD ["php-fpm", "--force-stderr", "--nodaemonize", "--fpm-config", "/usr/local/etc/php-fpm.d/www.conf"]
