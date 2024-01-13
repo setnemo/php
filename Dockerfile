@@ -1,5 +1,5 @@
-FROM node:18.1.0-alpine3.15 AS nodejs
-FROM php:8.2.12-fpm-alpine3.18
+FROM node:18.1.0-alpine3.18 AS nodejs
+FROM php:8.3.1-fpm-alpine3.18
 USER root
 ENV TZ=Etc/GMT
 ENV OPCACHE=""
@@ -25,7 +25,7 @@ RUN echo "cgi.fix_pathinfo=0" > ${php_vars} &&\
         -e "s/^;clear_env = no$/clear_env = no/" \
         ${fpm_conf} \
     && cp /usr/local/etc/php/php.ini-production /usr/local/etc/php/php.ini
-RUN apk add --no-cache php-cli php82-dev linux-headers php82-bcmath libstdc++ mysql-client bash bash-completion shadow
+RUN apk add --no-cache linux-headers libstdc++ mysql-client bash bash-completion shadow
 RUN apk add --no-cache supervisor git zip unzip python3 coreutils libpng libmemcached-libs krb5-libs icu-libs
 RUN apk add --no-cache icu c-client libzip openldap-clients imap postgresql-client postgresql-libs libcap tzdata sqlite
 RUN curl http://getcomposer.org/installer | php -- --install-dir=/usr/bin/ --filename=composer
