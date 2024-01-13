@@ -14,6 +14,8 @@ jobs:
       - name: Build and Publish latest Docker image
         uses: TCPShield/gp-docker-action@1.1.13
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }} # Provide GITHUB_TOKEN to login into the GitHub Packages
-          image-name: ghcr.io/setnemo/php:latest # Provide Docker image name
-          image-tag: latest # Provide Docker image tag
+          github-username: ${{ secrets.DOCKER_USERNAME }}
+          github-token: ${{ secrets.DOCKER_TOKEN }}
+          image-name: ghcr.io/setnemo/php
+          image-tag: latest
+          dockerfile: ./Dockerfile
