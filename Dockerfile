@@ -1,4 +1,4 @@
-FROM node:18.1.0-alpine3.18 AS nodejs
+FROM node:18.1.0-alpine3.15 AS nodejs
 FROM php:8.3.1-fpm-alpine3.18
 USER root
 ENV TZ=Etc/GMT
