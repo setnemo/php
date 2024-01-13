@@ -19,4 +19,3 @@ default: build-and-push
 
 %:
 	@:
-

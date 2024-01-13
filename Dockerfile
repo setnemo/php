@@ -63,7 +63,8 @@ RUN echo "date.timezone="${TZ} > /usr/local/etc/php/conf.d/timezone.ini \
     && sed -i "s/post_max_size = 100M/post_max_size = 1024M/g" /usr/local/etc/php/conf.d/docker-vars.ini \
     && sed -i "s/upload_max_filesize = 100M/upload_max_filesize = 1024M/g" /usr/local/etc/php/conf.d/docker-vars.ini \
     && mkdir -p /var/www/html/storage/{logs,app/public,framework/{cache/data,sessions,testing,views}}
-RUN echo '* * * * * /bin/bash -c "FILE=/dev/shm/supervisor.sock; if [ -f \"${FILE}\" ] ; then echo skipping; else /usr/bin/supervisord -c /etc/supervisord.conf; fi;"' > crontab.txt
+RUN echo '* * * * * php /var/www/html/artisan schedule:run >> /dev/null 2>&1' > crontab.txt
+RUN echo '* * * * * /bin/bash -c "FILE=/dev/shm/supervisor.sock; if [ -f \"${FILE}\" ] ; then echo skipping; else /usr/bin/supervisord -c /etc/supervisord.conf; fi;"' >> crontab.txt
 RUN echo '* * * * * /bin/bash -c "FILE=/var/www/html/supervisor-restart.pid; if [ -f \"${FILE}\" ] ; then supervisorctl restart all && rm /var/www/html/supervisor-restart.pid; else sleep 45; fi;"' >> crontab.txt
 RUN /usr/bin/crontab ./crontab.txt
 WORKDIR "/var/www/html"
