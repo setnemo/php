@@ -1,6 +1,8 @@
-# Nphp-fpm (v8.2.12)
+# php-fpm (v8.3.1) for Laravel projects
 
-Based on php:php:8.2.12-fpm-alpine3.18 + supervisor ```/etc/supervisor/conf.d/*.conf```
+Based on php:php:8.3.1-fpm-alpine3.18 + supervisor ```/etc/supervisor/conf.d/*.conf```
+
+Default TZ = Etc/GMT+2
 
 ## PHP Modules
 

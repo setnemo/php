@@ -1,7 +1,7 @@
 FROM node:18.1.0-alpine3.15 AS nodejs
 FROM php:8.3.1-fpm-alpine3.18
 USER root
-ENV TZ=Etc/GMT
+ENV TZ=Etc/GMT+2
 ENV OPCACHE=""
 ENV COMPOSERMIRROR=""
 ENV PHP_MODULE_DEPS zlib-dev libmemcached-dev cyrus-sasl-dev libpng-dev libxml2-dev krb5-dev curl-dev icu-dev libzip-dev openldap-dev imap-dev postgresql-dev
