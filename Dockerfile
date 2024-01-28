@@ -68,6 +68,7 @@ RUN echo '* * * * * php /var/www/html/artisan artisan queue:listen >> /dev/null 
 RUN echo '* * * * * /bin/bash -c "if [ -f \"/dev/shm/supervisor.sock\" ] ; then echo skipping; else /usr/bin/supervisord -c /etc/supervisord.conf; fi;"' >> crontab.txt
 RUN echo '* * * * * /bin/bash -c "if [ -f \"/var/www/html/supervisor-restart.pid\" ] ; then supervisorctl restart all && rm /var/www/html/supervisor-restart.pid; else sleep 45; fi;"' >> crontab.txt
 RUN /usr/bin/crontab ./crontab.txt
+RUN crond -b
 WORKDIR "/var/www/html"
 STOPSIGNAL SIGQUIT
 EXPOSE 9000
