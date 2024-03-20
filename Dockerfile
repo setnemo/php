@@ -4,7 +4,7 @@ USER root
 ENV TZ=Etc/GMT+2
 ENV OPCACHE=""
 ENV COMPOSERMIRROR=""
-ENV PHP_MODULE_DEPS zlib-dev libmemcached-dev cyrus-sasl-dev libpng-dev libxml2-dev krb5-dev curl-dev icu-dev libzip-dev openldap-dev imap-dev postgresql-dev
+ENV PHP_MODULE_DEPS zlib-dev libmemcached-dev cyrus-sasl-dev libpng-dev libxml2-dev krb5-dev curl-dev icu-dev libzip-dev openldap-dev imap-dev postgresql-dev imagemagick-dev
 ENV fpm_conf /usr/local/etc/php-fpm.d/www.conf
 ENV php_vars /usr/local/etc/php/conf.d/docker-vars.ini
 COPY --from=nodejs /opt /opt
@@ -43,6 +43,7 @@ RUN printf "\n\n\n\n" | pecl install -o -f redis
 RUN rm -rf /tmp/pear
 RUN docker-php-ext-enable redis
 RUN docker-php-ext-enable sockets
+RUN pecl install imagick && docker-php-ext-enable imagick
 RUN pecl install msgpack && docker-php-ext-enable msgpack
 RUN pecl install igbinary && docker-php-ext-enable igbinary
 RUN printf "\n\n\n\n\n\n\n\n\n\n" | pecl install memcached
