@@ -28,7 +28,7 @@ RUN echo "cgi.fix_pathinfo=0" > ${php_vars} &&\
     && cp /usr/local/etc/php/php.ini-production /usr/local/etc/php/php.ini
 RUN apk add --no-cache linux-headers libstdc++ mysql-client bash bash-completion shadow \
     supervisor git zip unzip python3 coreutils libpng libmemcached-libs krb5-libs icu-libs \
-    icu c-client libzip openldap-clients imap postgresql-client postgresql-libs libcap tzdata sqlite \
+    icu c-client libzip openldap-clients imap postgresql-client postgresql-libs libcap tzdata sqlite
 RUN RUN apk add php82-pecl-imagick --repository=https://dl-cdn.alpinelinux.org/alpine/edge/testing
 RUN curl http://getcomposer.org/installer | php -- --install-dir=/usr/bin/ --filename=composer
 RUN apk add --no-cache lua-resty-core libc-dev make gcc clang vim bat
