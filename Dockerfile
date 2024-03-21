@@ -30,7 +30,7 @@ RUN apk add --no-cache linux-headers libstdc++ mysql-client bash bash-completion
     supervisor git zip unzip python3 coreutils libpng libmemcached-libs krb5-libs icu-libs \
     icu c-client libzip openldap-clients imap postgresql-client postgresql-libs libcap tzdata sqlite \
     lua-resty-core libc-dev make gcc clang vim bat
-RUN RUN apk add php83-pecl-imagick --repository=https://dl-cdn.alpinelinux.org/alpine/edge/testing
+RUN apk add php83-pecl-imagick --repository=https://dl-cdn.alpinelinux.org/alpine/edge/testing
 RUN curl http://getcomposer.org/installer | php -- --install-dir=/usr/bin/ --filename=composer
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 RUN set -xe
