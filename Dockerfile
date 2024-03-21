@@ -28,17 +28,17 @@ RUN echo "cgi.fix_pathinfo=0" > ${php_vars} &&\
     && cp /usr/local/etc/php/php.ini-production /usr/local/etc/php/php.ini
 RUN apk add --no-cache linux-headers libstdc++ mysql-client bash bash-completion shadow \
     supervisor git zip unzip python3 coreutils libpng libmemcached-libs krb5-libs icu-libs \
-    icu c-client libzip openldap-clients imap postgresql-client postgresql-libs libcap tzdata sqlite
+    icu c-client libzip openldap-clients imap postgresql-client postgresql-libs libcap tzdata sqlite \
+    lua-resty-core libc-dev make gcc clang vim bat
 RUN RUN apk add php83-pecl-imagick --repository=https://dl-cdn.alpinelinux.org/alpine/edge/testing
 RUN curl http://getcomposer.org/installer | php -- --install-dir=/usr/bin/ --filename=composer
-RUN apk add --no-cache lua-resty-core libc-dev make gcc clang vim bat
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 RUN set -xe
 RUN apk add --no-cache --update --virtual .phpize-deps $PHPIZE_DEPS
 RUN apk add --no-cache --update --virtual .all-deps $PHP_MODULE_DEPS
 COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr/local/bin/
-RUN install-php-extensions sockets \
-    && install-php-extensions bcmath
+RUN install-php-extensions sockets
+RUN install-php-extensions bcmath
 RUN docker-php-ext-install pgsql pdo_pgsql zip imap dom mysqli pdo pdo_mysql pgsql gd intl soap
 RUN if [[ "$OPCACHE" != "0" ]]; then docker-php-ext-install opcache; fi
 RUN printf "\n\n\n\n" | pecl install -o -f redis
@@ -47,9 +47,9 @@ RUN docker-php-ext-enable redis
 RUN docker-php-ext-enable sockets
 RUN pecl install msgpack && docker-php-ext-enable msgpack
 RUN pecl install igbinary && docker-php-ext-enable igbinary
-RUN docker-php-ext-enable imagick
-RUN docker-php-ext-install gd
-RUN docker-php-ext-install exif
+RUN pecl install -o -f imagick && docker-php-ext-enable imagick
+RUN docker-php-ext-enable gd
+RUN docker-php-ext-enable exif
 RUN printf "\n\n\n\n\n\n\n\n\n\n" | pecl install memcached
 RUN docker-php-ext-enable memcached
 COPY conf/supervisord.conf /etc/supervisord.conf
