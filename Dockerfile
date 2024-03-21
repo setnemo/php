@@ -31,6 +31,7 @@ RUN apk add --no-cache linux-headers libstdc++ mysql-client bash bash-completion
     icu c-client libzip openldap-clients imap postgresql-client postgresql-libs libcap tzdata sqlite \
     lua-resty-core libc-dev make gcc clang vim bat
 RUN apk add php83-pecl-imagick --repository=https://dl-cdn.alpinelinux.org/alpine/edge/community
+RUN pecl install imagick && docker-php-ext-enable imagick
 RUN curl http://getcomposer.org/installer | php -- --install-dir=/usr/bin/ --filename=composer
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 RUN set -xe
@@ -43,7 +44,6 @@ RUN docker-php-ext-install pgsql pdo_pgsql zip imap dom mysqli pdo pdo_mysql pgs
 RUN if [[ "$OPCACHE" != "0" ]]; then docker-php-ext-install opcache; fi
 RUN printf "\n\n\n\n" | pecl install -o -f redis
 RUN rm -rf /tmp/pear
-RUN docker-php-ext-enable imagick
 RUN docker-php-ext-enable redis
 RUN docker-php-ext-enable sockets
 RUN pecl install msgpack && docker-php-ext-enable msgpack
