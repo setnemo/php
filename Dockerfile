@@ -31,12 +31,12 @@ RUN apk add --no-cache linux-headers libstdc++ mysql-client bash bash-completion
     icu c-client libzip openldap-clients imap postgresql-client postgresql-libs libcap tzdata sqlite \
     lua-resty-core libc-dev make gcc clang vim bat
 RUN apk add php83-pecl-imagick --repository=https://dl-cdn.alpinelinux.org/alpine/edge/community
-RUN pecl install imagick && docker-php-ext-enable imagick
 RUN curl http://getcomposer.org/installer | php -- --install-dir=/usr/bin/ --filename=composer
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 RUN set -xe
 RUN apk add --no-cache --update --virtual .phpize-deps $PHPIZE_DEPS
 RUN apk add --no-cache --update --virtual .all-deps $PHP_MODULE_DEPS
+RUN pecl install imagick && docker-php-ext-enable imagick
 COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr/local/bin/
 RUN install-php-extensions sockets \
     && install-php-extensions bcmath
