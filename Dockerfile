@@ -36,7 +36,16 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 RUN set -xe
 RUN apk add --no-cache --update --virtual .phpize-deps $PHPIZE_DEPS
 RUN apk add --no-cache --update --virtual .all-deps $PHP_MODULE_DEPS
-RUN pecl install imagick && docker-php-ext-enable imagick
+RUN git clone https://github.com/Imagick/imagick.git --depth 1 /tmp/imagick && \
+    cd /tmp/imagick && \
+    git fetch origin pull/641/head:fix-unterminated-preprocessor-conditions && \
+    git switch fix-unterminated-preprocessor-conditions
+RUN cd /tmp/imagick && \
+    phpize && \
+    ./configure && \
+    make && \
+    make install
+RUN docker-php-ext-enable imagick
 COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr/local/bin/
 RUN install-php-extensions sockets \
     && install-php-extensions bcmath
