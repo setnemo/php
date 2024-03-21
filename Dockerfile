@@ -73,4 +73,4 @@ RUN crond -b
 WORKDIR "/var/www/html"
 STOPSIGNAL SIGQUIT
 EXPOSE 9000
-CMD ["php-fpm"]
+CMD ["crond", "php-fpm"]
