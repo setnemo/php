@@ -30,22 +30,20 @@ RUN apk add --no-cache linux-headers libstdc++ mysql-client bash bash-completion
     supervisor git zip unzip python3 coreutils libpng libmemcached-libs krb5-libs icu-libs \
     icu c-client libzip openldap-clients imap postgresql-client postgresql-libs libcap tzdata sqlite \
     lua-resty-core libc-dev make gcc clang vim bat
-RUN apk add --no-cache php83-pecl-imagick
-RUN pecl install -o -f imagick && docker-php-ext-enable imagick
-RUN docker-php-ext-enable gd
-RUN docker-php-ext-enable exif
+RUN apk add php83-pecl-imagick --repository=https://dl-cdn.alpinelinux.org/alpine/edge/community
 RUN curl http://getcomposer.org/installer | php -- --install-dir=/usr/bin/ --filename=composer
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 RUN set -xe
 RUN apk add --no-cache --update --virtual .phpize-deps $PHPIZE_DEPS
 RUN apk add --no-cache --update --virtual .all-deps $PHP_MODULE_DEPS
 COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr/local/bin/
-RUN install-php-extensions sockets
-RUN install-php-extensions bcmath
-RUN docker-php-ext-install pgsql pdo_pgsql zip imap dom mysqli pdo pdo_mysql pgsql gd intl soap
+RUN install-php-extensions sockets \
+    && install-php-extensions bcmath
+RUN docker-php-ext-install pgsql pdo_pgsql zip imap dom mysqli pdo pdo_mysql pgsql gd intl soap exif
 RUN if [[ "$OPCACHE" != "0" ]]; then docker-php-ext-install opcache; fi
 RUN printf "\n\n\n\n" | pecl install -o -f redis
 RUN rm -rf /tmp/pear
+RUN docker-php-ext-enable imagick
 RUN docker-php-ext-enable redis
 RUN docker-php-ext-enable sockets
 RUN pecl install msgpack && docker-php-ext-enable msgpack
@@ -72,8 +70,8 @@ RUN echo '* * * * * php /var/www/html/artisan schedule:run >> /dev/null 2>&1' > 
 RUN echo '* * * * * /bin/bash -c "if [ -f \"/dev/shm/supervisor.sock\" ] ; then echo skipping; else /usr/bin/supervisord -c /etc/supervisord.conf; fi;"' >> crontab.txt
 RUN echo '* * * * * /bin/bash -c "if [ -f \"/var/www/html/supervisor-restart.pid\" ] ; then supervisorctl restart all && rm /var/www/html/supervisor-restart.pid; else sleep 45; fi;"' >> crontab.txt
 RUN /usr/bin/crontab ./crontab.txt
-RUN crond -b
+RUN bash -c "/usr/sbin/crond -f" &
 WORKDIR "/var/www/html"
 STOPSIGNAL SIGQUIT
 EXPOSE 9000
-CMD ["crond", "php-fpm"]
+CMD ["php-fpm"]
