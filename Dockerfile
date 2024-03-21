@@ -30,7 +30,10 @@ RUN apk add --no-cache linux-headers libstdc++ mysql-client bash bash-completion
     supervisor git zip unzip python3 coreutils libpng libmemcached-libs krb5-libs icu-libs \
     icu c-client libzip openldap-clients imap postgresql-client postgresql-libs libcap tzdata sqlite \
     lua-resty-core libc-dev make gcc clang vim bat
-RUN apk add php83-pecl-imagick --repository=https://dl-cdn.alpinelinux.org/alpine/edge/testing
+RUN apk add --no-cache php83-pecl-imagick
+RUN pecl install -o -f imagick && docker-php-ext-enable imagick
+RUN docker-php-ext-enable gd
+RUN docker-php-ext-enable exif
 RUN curl http://getcomposer.org/installer | php -- --install-dir=/usr/bin/ --filename=composer
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 RUN set -xe
@@ -47,9 +50,6 @@ RUN docker-php-ext-enable redis
 RUN docker-php-ext-enable sockets
 RUN pecl install msgpack && docker-php-ext-enable msgpack
 RUN pecl install igbinary && docker-php-ext-enable igbinary
-RUN pecl install -o -f imagick && docker-php-ext-enable imagick
-RUN docker-php-ext-enable gd
-RUN docker-php-ext-enable exif
 RUN printf "\n\n\n\n\n\n\n\n\n\n" | pecl install memcached
 RUN docker-php-ext-enable memcached
 COPY conf/supervisord.conf /etc/supervisord.conf
