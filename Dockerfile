@@ -71,7 +71,7 @@ RUN echo "date.timezone="${TZ} > /usr/local/etc/php/conf.d/timezone.ini \
 RUN echo '* * * * * /bin/bash -c "if [ -f \"/dev/shm/supervisor.sock\" ] ; then echo skipping; else /usr/bin/supervisord -c /etc/supervisord.conf; fi;"' >> crontab.txt
 RUN echo '* * * * * /bin/bash -c "if [ -f \"/var/www/html/supervisor-restart.pid\" ] ; then supervisorctl restart all && rm /var/www/html/supervisor-restart.pid; else sleep 45; fi;"' >> crontab.txt
 RUN /usr/bin/crontab ./crontab.txt
-RUN bash -c "/usr/sbin/crond -f" &
+RUN bash -c "/usr/sbin/crond -b" &
 WORKDIR "/var/www/html"
 STOPSIGNAL SIGQUIT
 EXPOSE 9000
