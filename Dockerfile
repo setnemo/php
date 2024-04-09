@@ -72,7 +72,9 @@ RUN echo '* * * * * /bin/bash -c "if [ -f \"/dev/shm/supervisor.sock\" ] ; then 
 RUN echo '* * * * * /bin/bash -c "if [ -f \"/var/www/html/supervisor-restart.pid\" ] ; then supervisorctl restart all && rm /var/www/html/supervisor-restart.pid; else sleep 45; fi;"' >> crontab.txt
 RUN /usr/bin/crontab ./crontab.txt
 RUN bash -c "/usr/sbin/crond -b" &
+COPY entrypoint.sh /
+RUN chmod +x /entrypoint.sh
 WORKDIR "/var/www/html"
 STOPSIGNAL SIGQUIT
 EXPOSE 9000
-CMD ["php-fpm"]
+CMD ["/entrypoint.sh"]

@@ -4,6 +4,19 @@ Based on php:php:8.3.1-fpm-alpine3.18 + supervisor ```/etc/supervisor/conf.d/*.c
 
 Default TZ = Etc/GMT+2
 
+Have to run crontab with next config
+```shell
+* * * * * /bin/bash -c "if [ -f \"/dev/shm/supervisor.sock\" ] ; then echo skipping; else /usr/bin/supervisord -c /etc/supervisord.conf; fi;"
+* * * * * /bin/bash -c "if [ -f \"/var/www/html/supervisor-restart.pid\" ] ; then supervisorctl restart all && rm /var/www/html/supervisor-restart.pid; else sleep 45; fi;"
+```
+Also have additional entrypoint for additional bash scripts after run container
+```shell
+START_SCRIPT=/var/www/html/start.sh
+if [ -f "$START_SCRIPT" ] ; then
+    chmod +x $START_SCRIPT
+    bash $START_SCRIPT
+fi
+```
 ## PHP Modules
 
 In this image it contains following PHP modules:
